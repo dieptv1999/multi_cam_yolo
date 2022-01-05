@@ -2,3 +2,4 @@ video_streamer/*.mp4
 .idea
 object_counting/model_data/*.h5
 object_counting/model_data/*.weights
+venv
