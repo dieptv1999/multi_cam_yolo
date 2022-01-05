@@ -53,7 +53,7 @@ class Camera(BaseCamera):
         nn_budget = None
 
         # deep_sort
-        model_filename = 'model_data/mars-small128.pb'
+        model_filename = '/home/dieptv/PycharmProjects/multi_cam_yolo/object_counting/model_data/mars-small128.pb'
         encoder = gdet.create_box_encoder(model_filename, batch_size=1)
 
         metric = nn_matching.NearestNeighborDistanceMetric("cosine", max_cosine_distance, nn_budget)

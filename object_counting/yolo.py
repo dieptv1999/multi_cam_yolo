@@ -4,14 +4,18 @@ YOLO v4 detection model.
 """
 
 import colorsys
+import random
 
 import numpy as np
 from keras import backend as K
 from keras.models import load_model
 
-from yolo4.model import yolo_eval, Mish
-from yolo4.utils import letterbox_image
+from yolo3.model import yolo_eval
+from yolo3.utils import letterbox_image
 import os
+
+from tensorflow.python.framework.ops import disable_eager_execution
+disable_eager_execution()
 
 class YOLO(object):
     def __init__(self):
@@ -45,27 +49,27 @@ class YOLO(object):
 
     def generate(self):
         model_path = os.path.expanduser(self.model_path)
-        assert model_path.endswith('.h5'), 'Keras model or weights must be a .h5 file.'
+        assert model_path.endswith('.h5'), 'Keras model must be a .h5 file.'
 
-        self.yolo_model = load_model(model_path, custom_objects={'Mish': Mish}, compile=False)
-
+        self.yolo_model = load_model(model_path, compile=False)
         print('{} model, anchors, and classes loaded.'.format(model_path))
 
+        # Generate colors for drawing bounding boxes.
         hsv_tuples = [(x / len(self.class_names), 1., 1.)
                       for x in range(len(self.class_names))]
         self.colors = list(map(lambda x: colorsys.hsv_to_rgb(*x), hsv_tuples))
         self.colors = list(
             map(lambda x: (int(x[0] * 255), int(x[1] * 255), int(x[2] * 255)),
                 self.colors))
-        np.random.seed(10101)  # Fixed seed for consistent colors across runs.
-        np.random.shuffle(self.colors)  # Shuffle colors to decorrelate adjacent classes.
-        np.random.seed(None)  # Reset seed to default.
+        random.seed(10101)  # Fixed seed for consistent colors across runs.
+        random.shuffle(self.colors)  # Shuffle colors to decorrelate adjacent classes.
+        random.seed(None)  # Reset seed to default.
 
         # Generate output tensor targets for filtered bounding boxes.
-        self.input_image_shape = K.placeholder(shape=(2, ))
+        self.input_image_shape = K.placeholder(shape=(2,))
         boxes, scores, classes = yolo_eval(self.yolo_model.output, self.anchors,
-                len(self.class_names), self.input_image_shape,
-                score_threshold=self.score, iou_threshold=self.iou)
+                                           len(self.class_names), self.input_image_shape,
+                                           score_threshold=self.score, iou_threshold=self.iou)
         return boxes, scores, classes
 
     def detect_image(self, image):
@@ -80,6 +84,7 @@ class YOLO(object):
             boxed_image = letterbox_image(image, new_image_size)
         image_data = np.array(boxed_image, dtype='float32')
 
+        #print(image_data.shape)
         image_data /= 255.
         image_data = np.expand_dims(image_data, 0)  # Add batch dimension.
 
@@ -95,7 +100,7 @@ class YOLO(object):
         return_class_names = []
         for i, c in reversed(list(enumerate(out_classes))):
             predicted_class = self.class_names[c]
-            if predicted_class != 'person':
+            if predicted_class != 'car':
                 continue
             box = out_boxes[i]
             score = out_scores[i]

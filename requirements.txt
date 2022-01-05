@@ -10,3 +10,4 @@ torchvision==0.11.2
 flask
 imagezmq
 imutils
+matplotlib
