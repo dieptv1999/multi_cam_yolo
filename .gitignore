@@ -3,3 +3,4 @@ video_streamer/*.mp4
 object_counting/model_data/*.h5
 object_counting/model_data/*.weights
 venv
+__pycache__

@@ -14,12 +14,10 @@ from yolo4.utils import letterbox_image
 import os
 
 # Uncomment below if you get CUDNN_STATUS_ALLOC_FAILED error
-"""
 import tensorflow as tf
 config = tf.ConfigProto()
-config.gpu_options.allow_growth = True
+config.gpu_options.per_process_gpu_memory_fraction = 0.6
 session = tf.Session(config=config)
-"""
 
 class YOLO(object):
     def __init__(self):
