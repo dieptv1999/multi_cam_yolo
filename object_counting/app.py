@@ -42,9 +42,10 @@ def gen(camera_stream, feed_type, device):
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
 
+camera_stream_yolo = import_module('camera_yolo').Camera
 @app.route('/video_feed/<feed_type>/<device>')
 def video_feed(feed_type, device):
-    port_list = (5566, 5555)
+    port_list = (5566, 5555, 5577)
     if feed_type == 'camera':
         camera_stream = import_module('camera_server').Camera
         return Response(
@@ -52,9 +53,8 @@ def video_feed(feed_type, device):
             mimetype='multipart/x-mixed-replace; boundary=frame')
 
     elif feed_type == 'yolo':
-        camera_stream = import_module('camera_yolo').Camera
         return Response(
-            gen(camera_stream=camera_stream(feed_type, device, port_list), feed_type=feed_type, device=device),
+            gen(camera_stream=camera_stream_yolo(feed_type, device, port_list), feed_type=feed_type, device=device),
             mimetype='multipart/x-mixed-replace; boundary=frame')
 
 

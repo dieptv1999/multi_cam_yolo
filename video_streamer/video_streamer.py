@@ -1,4 +1,5 @@
 import threading
+import time
 
 import cv2
 import errno
@@ -49,6 +50,7 @@ def create_streamer(file, connect_to='tcp://127.0.0.1:5555', loop=True):
             # if no frame was returned, either restart or stop the stream
             if loop:
                 cap = cv2.VideoCapture(file)
+                time.sleep(0.5)
             else:
                 break
 
@@ -61,7 +63,6 @@ args = vars(ap.parse_args())
 if __name__ == '__main__':
     try:
         for i in range(len(args['port'])):
-            print(i)
             t1 = threading.Thread(target=create_streamer, args=(args['video'][i], 'tcp://127.0.0.1:' + args['port'][i]))
             t1.start()
             # streamer = create_streamer('camera.mp4', 'tcp://127.0.0.1:' + i)

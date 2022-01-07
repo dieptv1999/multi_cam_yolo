@@ -110,20 +110,20 @@ class BaseCamera:
         print(unique_name)
 
         frames_iterator = cls.yolo_frames(unique_name)
-        # try:
-        for cam_id, frame in frames_iterator:
-            BaseCamera.frame[unique_name] = cam_id, frame
+        try:
+            for cam_id, frame in frames_iterator:
+                BaseCamera.frame[unique_name] = cam_id, frame
+                BaseCamera.event[unique_name].set()  # send signal to clients
+                time.sleep(0)
+                if time.time() - BaseCamera.last_access[unique_name] > 60:
+                    frames_iterator.close()
+                    print('Stopping YOLO thread for device {} due to inactivity.'.format(device))
+                    pass
+        except Exception as e:
             BaseCamera.event[unique_name].set()  # send signal to clients
-            time.sleep(0)
-            if time.time() - BaseCamera.last_access[unique_name] > 60:
-                frames_iterator.close()
-                print('Stopping YOLO thread for device {} due to inactivity.'.format(device))
-                pass
-        # except Exception as e:
-        #     BaseCamera.event[unique_name].set()  # send signal to clients
-        #     frames_iterator.close()
-        #     print('Stopping YOLO thread for device {} due to error.'.format(device))
-        #     print(e)
+            frames_iterator.close()
+            print('Stopping YOLO thread for device {} due to error.'.format(device))
+            print(e)
 
     @classmethod
     def server_thread(cls, unique_name, port):
@@ -132,23 +132,23 @@ class BaseCamera:
         image_hub = imagezmq.ImageHub(open_port='tcp://*:{}'.format(port))
 
         frames_iterator = cls.server_frames(image_hub)
-        try:
-            for cam_id, frame in frames_iterator:
-                BaseCamera.frame[unique_name] = cam_id, frame
-                BaseCamera.event[unique_name].set()  # send signal to clients
-                time.sleep(0)
-                if time.time() - BaseCamera.last_access[unique_name] > 5:
-                    frames_iterator.close()
-                    image_hub.zmq_socket.close()
-                    print('Closing server socket at port {}.'.format(port))
-                    print('Stopping server thread for device {} due to inactivity.'.format(device))
-                    pass
-        except Exception as e:
-            frames_iterator.close()
-            image_hub.zmq_socket.close()
-            print('Closing server socket at port {}.'.format(port))
-            print('Stopping server thread for device {} due to error.'.format(device))
-            print(e)
+        # try:
+        for cam_id, frame in frames_iterator:
+            BaseCamera.frame[unique_name] = cam_id, frame
+            BaseCamera.event[unique_name].set()  # send signal to clients
+            time.sleep(0)
+            if time.time() - BaseCamera.last_access[unique_name] > 5:
+                frames_iterator.close()
+                image_hub.zmq_socket.close()
+                print('Closing server socket at port {}.'.format(port))
+                print('Stopping server thread for device {} due to inactivity.'.format(device))
+                pass
+        # except Exception as e:
+        #     frames_iterator.close()
+        #     image_hub.zmq_socket.close()
+        #     print('Closing server socket at port {}.'.format(port))
+        #     print('Stopping server thread for device {} due to error.'.format(device))
+        #     print(e)
 
     @classmethod
     def _thread(cls, unique_name, port_list):

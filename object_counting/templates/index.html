@@ -45,5 +45,16 @@
   </div>
 </div>
 
+<div class="clearfix">
+  <div class="img-container">
+        <p align="center">Camera stream 3</p>
+        <img src="{{ url_for('video_feed', feed_type='camera', device=2) }}" class="center"  style="border:1px solid black;width:100%" alt="Camera stream 3">
+  </div>
+  <div class="img-container">
+        <p align="center">YOLO stream 3</p>
+        <img src="{{ url_for('video_feed', feed_type='yolo', device=2) }}" class="center"  style="border:1px solid black;width:100%" alt="YOLO Stream 3">
+  </div>
+</div>
+
 </body>
 </html>

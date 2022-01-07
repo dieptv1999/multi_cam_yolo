@@ -1,6 +1,5 @@
 import Head from 'next/head'
 import {BASE_URL} from "/const"
-import Image from "next/image";
 
 export default function Home() {
   return (
@@ -15,26 +14,32 @@ export default function Home() {
 
         <div className="flex">
           <div className="flex-1 mr-2">
-            <p className="text-center">Camera stream 1</p>
+            <div className="text-center">Camera stream 1</div>
             <img src={`${BASE_URL}/video_feed/camera/0`} alt="Camera stream 1" className="img-container"/>
           </div>
           <div className="flex-1 ml-2">
-            <p className="text-center">YOLO stream 1</p>
+            <div className="text-center">YOLO stream 1</div>
             <img src={`${BASE_URL}/video_feed/yolo/0`} alt="YOLO Stream 1" className="img-container"/>
           </div>
         </div>
 
         <div className="flex">
           <div className="flex-1 mr-2">
-            <p className="text-center">Camera stream 2</p>
+            <div className="text-center">Camera stream 2</div>
             <img src={`${BASE_URL}/video_feed/camera/1`} alt="Camera stream 2" className="img-container"/>
           </div>
           <div className="flex-1 ml-2">
-            <p className="text-center">YOLO stream 2</p>
+            <div className="text-center">YOLO stream 2</div>
             <img src={`${BASE_URL}/video_feed/yolo/1`} alt="YOLO Stream 2" className="img-container"/>
           </div>
         </div>
       </div>
     </div>
   )
+}
+
+export async function getServerSideProps(context) {
+  return {
+    props: {},
+  }
 }

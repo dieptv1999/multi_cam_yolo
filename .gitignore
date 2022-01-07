@@ -4,3 +4,4 @@ object_counting/model_data/*.h5
 object_counting/model_data/*.weights
 venv
 __pycache__
+fe_yolo/node_modules
