@@ -110,20 +110,20 @@ class BaseCamera:
         print(unique_name)
 
         frames_iterator = cls.yolo_frames(unique_name)
-        try:
-            for frame in frames_iterator:
-                BaseCamera.frame[unique_name] = frame
-                BaseCamera.event[unique_name].set()  # send signal to clients
-                time.sleep(0)
-                if time.time() - BaseCamera.last_access[unique_name] > 60:
-                    frames_iterator.close()
-                    print('Stopping YOLO thread for device {} due to inactivity.'.format(device))
-                    pass
-        except Exception as e:
+        # try:
+        for cam_id, frame in frames_iterator:
+            BaseCamera.frame[unique_name] = cam_id, frame
             BaseCamera.event[unique_name].set()  # send signal to clients
-            frames_iterator.close()
-            print('Stopping YOLO thread for device {} due to error.'.format(device))
-            print(e)
+            time.sleep(0)
+            if time.time() - BaseCamera.last_access[unique_name] > 60:
+                frames_iterator.close()
+                print('Stopping YOLO thread for device {} due to inactivity.'.format(device))
+                pass
+        # except Exception as e:
+        #     BaseCamera.event[unique_name].set()  # send signal to clients
+        #     frames_iterator.close()
+        #     print('Stopping YOLO thread for device {} due to error.'.format(device))
+        #     print(e)
 
     @classmethod
     def server_thread(cls, unique_name, port):

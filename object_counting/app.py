@@ -4,6 +4,7 @@ import cv2
 import time
 
 app = Flask(__name__)
+app.debug = True
 
 @app.route('/')
 def index():
@@ -28,7 +29,7 @@ def gen(camera_stream, feed_type, device):
         total_time += time_now - time_start
         fps = num_frames / total_time
 
-        # write camera name
+        # camera name
         cv2.putText(frame, cam_id, (int(20), int(20 * 5e-3 * frame.shape[0])), 0, 2e-3 * frame.shape[0],
                     (255, 255, 255), 2)
 

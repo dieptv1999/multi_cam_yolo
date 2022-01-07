@@ -4,6 +4,7 @@ import numpy as np
 from scipy.optimize import linear_sum_assignment as linear_assignment
 from . import kalman_filter
 
+
 INFTY_COST = 1e+5
 
 

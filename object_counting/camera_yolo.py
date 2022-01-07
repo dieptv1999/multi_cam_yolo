@@ -37,7 +37,7 @@ class Camera(BaseCamera):
             nn_budget = None
 
             # deep_sort
-            model_filename = '/home/dieptv/PycharmProjects/multi_cam_yolo/object_counting/model_data/mars-small128.pb'
+            model_filename = 'model_data/mars-small128.pb'
             encoder = gdet.create_box_encoder(model_filename, batch_size=1)
 
             metric = nn_matching.NearestNeighborDistanceMetric("cosine", max_cosine_distance, nn_budget)
@@ -64,17 +64,12 @@ class Camera(BaseCamera):
             if num_frames % 2 != 0:  # only process frames at set number of frame intervals
                 continue
 
-            #image = Image.fromarray(frame)
             image = Image.fromarray(frame[..., ::-1])  # convert bgr to rgb
             boxes, confidence, classes = yolo.detect_image(image)
-            if tracking:
-                features = encoder(frame, boxes)
+            detections = []
+            features = encoder(frame, boxes)
 
-                detections = [Detection(bbox, confidence, cls, feature) for bbox, confidence, cls, feature in
-                              zip(boxes, confidence, classes, features)]
-            else:
-                detections = [Detection_YOLO(bbox, confidence, cls) for bbox, confidence, cls in
-                              zip(boxes, confidence, classes)]
+            detections = [Detection(bbox, 1.0, cls, feature) for bbox, cls, feature in zip(boxes, classes, features)]
             # Run non-maxima suppression.
             boxes = np.array([d.tlwh for d in detections])
             scores = np.array([d.confidence for d in detections])
