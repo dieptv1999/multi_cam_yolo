@@ -11,3 +11,4 @@ flask
 imagezmq
 imutils
 matplotlib
+flask_cors

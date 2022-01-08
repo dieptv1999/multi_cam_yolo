@@ -36,7 +36,6 @@ class Camera(BaseCamera):
             nn_matching = import_module('deep_sort.nn_matching')
             Tracker = import_module('deep_sort.tracker').Tracker
 
-            # Definition of the parameters
             max_cosine_distance = 0.3
             nn_budget = None
 
@@ -58,14 +57,13 @@ class Camera(BaseCamera):
         count_dict = {}
         while True:
             cam_id, frame = BaseCamera.get_frame(get_feed_from)
-            # image_height, image_width = frame.shape[:2]
 
             if frame is None:
                 break
 
             num_frames += 1
 
-            if num_frames % 2 != 0:  # only process frames at set number of frame intervals
+            if num_frames % 2 != 0:
                 continue
 
             image = Image.fromarray(frame[..., ::-1])  # convert bgr to rgb
@@ -73,7 +71,8 @@ class Camera(BaseCamera):
             detections = []
             features = encoder(frame, boxes)
 
-            detections = [Detection(bbox, confidence, cls, feature) for bbox, cls, confidence, feature in zip(boxes, classes, confidence, features)]
+            detections = [Detection(bbox, confidence, cls, feature) for bbox, cls, confidence, feature in
+                          zip(boxes, classes, confidence, features)]
             boxes = np.array([d.tlwh for d in detections])
             scores = np.array([d.confidence for d in detections])
             indices = preprocessing.non_max_suppression(boxes, nms_max_overlap, scores)
@@ -87,15 +86,15 @@ class Camera(BaseCamera):
                 tracker.update(detections)
 
                 track_count = int(0)
-                indexIDs = []
+                index_i_ds = []
 
                 for track in tracker.tracks:
                     if not track.is_confirmed() or track.time_since_update > 1:
                         continue
-                    indexIDs.append(int(track.track_id))
+                    index_i_ds.append(int(track.track_id))
                     counter.append(int(track.track_id))
                     bbox = track.to_tlbr()
-                    color = [int(c) for c in COLORS[indexIDs[track_count] % len(COLORS)]]
+                    color = [int(c) for c in COLORS[index_i_ds[track_count] % len(COLORS)]]
 
                     cv2.rectangle(frame, (int(bbox[0]), int(bbox[1])), (int(bbox[2]), int(bbox[3])), (255, 255, 255),
                                   1)  # WHITE BOX
@@ -106,7 +105,7 @@ class Camera(BaseCamera):
                     center = (int(((bbox[0]) + (bbox[2])) / 2), int(((bbox[1]) + (bbox[3])) / 2))
                     pts[track.track_id].append(center)
                     thickness = 5
-                    cv2.circle(frame, (center), 1, color, thickness)
+                    cv2.circle(frame, center, 1, color, thickness)
 
                     for j in range(1, len(pts[track.track_id])):
                         if pts[track.track_id][j - 1] is None or pts[track.track_id][j] is None:
@@ -114,7 +113,8 @@ class Camera(BaseCamera):
                         thickness = int(np.sqrt(64 / float(j + 1)) * 2)
                         cv2.line(frame, (pts[track.track_id][j - 1]), (pts[track.track_id][j]), (color), thickness)
 
-                cv2.putText(frame, "Current total count: " + str(track_count), (int(20), int(60 * 5e-3 * frame.shape[0])), 0, 2e-3 * frame.shape[0],
+                cv2.putText(frame, "Current total count: " + str(track_count),
+                            (int(20), int(60 * 5e-3 * frame.shape[0])), 0, 2e-3 * frame.shape[0],
                             (255, 255, 255), 2)
 
             det_count = int(0)
@@ -122,7 +122,7 @@ class Camera(BaseCamera):
                 bbox = det.to_tlbr()
                 score = "%.2f" % (det.confidence * 100) + "%"
                 cv2.rectangle(frame, (int(bbox[0]), int(bbox[1])), (int(bbox[2]), int(bbox[3])), (255, 0, 0),
-                              1)  # BLUE BOX
+                              1)
                 if len(classes) > 0:
                     cls = det.cls
                     cv2.putText(frame, str(cls) + " " + score, (int(bbox[0]), int(bbox[3])), 0,
@@ -130,7 +130,6 @@ class Camera(BaseCamera):
                     class_counter[cls] += 1
                 det_count += 1
 
-            # display counts for each class as they appear
             y = 80 * 5e-3 * frame.shape[0]
             for cls in class_counter:
                 class_count = class_counter[cls]
@@ -144,9 +143,21 @@ class Camera(BaseCamera):
             else:
                 count = det_count
 
-            # calculate current minute
+            # if count > 0:
+            #     print(count, "count")
+            #     bordersize = 4
+            #     frame = cv2.copyMakeBorder(
+            #         frame,
+            #         top=bordersize,
+            #         bottom=bordersize,
+            #         left=bordersize,
+            #         right=bordersize,
+            #         borderType=cv2.BORDER_REPLICATE,
+            #         value=[255, 0, 0]
+            #     )
+
             now = datetime.datetime.now()
-            rounded_now = now - datetime.timedelta(microseconds=now.microsecond)  # round to nearest second
+            rounded_now = now - datetime.timedelta(microseconds=now.microsecond)
             current_minute = now.time().minute
 
             if current_minute == 0 and len(count_dict) > 1:
@@ -162,7 +173,6 @@ class Camera(BaseCamera):
                         total_count_file.write(str(rounded_now) + ", " + device + ', ' + str(count) + "\n")
                         total_count_file.close()
 
-                        # if class exists in class counter, create file and write counts
                         for cls in class_counter:
                             class_count = class_counter[cls]
                             class_filename = '{} counts for {}, camera {}.txt'.format(cls, current_date, device)
@@ -171,4 +181,4 @@ class Camera(BaseCamera):
                             class_count_file.write(str(rounded_now) + ", " + device + ', ' + str(class_count) + "\n")
                             class_count_file.close()
 
-            yield cam_id, frame
+            yield cam_id, frame, count

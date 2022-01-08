@@ -42,7 +42,7 @@ def create_streamer(file, connect_to='tcp://127.0.0.1:5555', loop=True):
 
     while True:
         ret, frame = cap.read()
-
+        time.sleep(0.025)
         if ret:
             # if a frame was returned, send it
             sender.send_image(host_name, frame)
@@ -50,7 +50,6 @@ def create_streamer(file, connect_to='tcp://127.0.0.1:5555', loop=True):
             # if no frame was returned, either restart or stop the stream
             if loop:
                 cap = cv2.VideoCapture(file)
-                time.sleep(0.5)
             else:
                 break
 

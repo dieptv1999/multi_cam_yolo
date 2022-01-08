@@ -1,14 +1,53 @@
+import datetime
+import json
 from importlib import import_module
-from flask import Flask, render_template, Response
+from flask import Flask, render_template, Response, request
 import cv2
 import time
+from flask_cors import CORS
 
 app = Flask(__name__)
 app.debug = True
+CORS(app)
+
+data = {}
+port_list = [5566, 5555, 5577]
+
 
 @app.route('/')
 def index():
     return render_template('index.html')
+
+
+@app.route('/data')
+def data_count():
+    def generate():
+        yield json.dumps(data)
+
+    return Response(generate(), mimetype='text')
+
+
+@app.route('/add_camera')
+def add_camera():
+    path = request.args.get('path')
+    port = request.args.get('port')
+
+    port_list.append(port)
+
+    from object_counting.camera_client import ClientCameraThread
+    thread = ClientCameraThread(
+        thread_name='camera'+str(port),
+        thread_id='camera'+str(port),
+        path=path,
+        port=port
+    )
+
+    thread.start()
+
+    def generate():
+        yield "Success"
+
+    return Response(generate(), mimetype='text')
 
 
 def gen(camera_stream, feed_type, device):
@@ -16,12 +55,21 @@ def gen(camera_stream, feed_type, device):
 
     num_frames = 0
     total_time = 0
+    cam_id = -1
+    frame = {}
+    count = None
     while True:
         time_start = time.time()
 
-        cam_id, frame = camera_stream.get_frame(unique_name)
+        if feed_type == 'camera':
+            cam_id, frame = camera_stream.get_frame(unique_name)
+        else:
+            cam_id, frame, count = camera_stream.get_frame(unique_name)
         if frame is None:
             break
+
+        if count is not None:
+            data['yolo' + device] = str(count)
 
         num_frames += 1
 
@@ -43,9 +91,10 @@ def gen(camera_stream, feed_type, device):
 
 
 camera_stream_yolo = import_module('camera_yolo').Camera
+
+
 @app.route('/video_feed/<feed_type>/<device>')
 def video_feed(feed_type, device):
-    port_list = (5566, 5555, 5577)
     if feed_type == 'camera':
         camera_stream = import_module('camera_server').Camera
         return Response(
