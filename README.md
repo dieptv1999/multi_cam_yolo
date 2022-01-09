@@ -1,6 +1,8 @@
 #install package 
+
 pip3 install -r requirements.txt
 #Để chạy project thì cần có multicam
+
 ##Để chạy giả lập từ video có thể chạy folder video_streamer
 > cd ./video_streamer
 > python3 ./video_streamer -p 5555 -p 5566 -v test3.mp4 -v test5.mp4
