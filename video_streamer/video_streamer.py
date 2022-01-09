@@ -42,7 +42,7 @@ def create_streamer(file, connect_to='tcp://127.0.0.1:5555', loop=True):
 
     while True:
         ret, frame = cap.read()
-        time.sleep(0.025)
+        time.sleep(0.035)
         if ret:
             # if a frame was returned, send it
             sender.send_image(host_name, frame)
