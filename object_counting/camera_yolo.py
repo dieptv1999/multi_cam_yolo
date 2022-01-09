@@ -102,6 +102,8 @@ class Camera(BaseCamera):
                                 1.5e-3 * frame.shape[0], (0, 255, 0), 1)
 
                     track_count += 1
+
+                    # Theo doi tracking
                     center = (int(((bbox[0]) + (bbox[2])) / 2), int(((bbox[1]) + (bbox[3])) / 2))
                     pts[track.track_id].append(center)
                     thickness = 5
